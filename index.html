@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Credit Card Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #formattedOutput {
+            font-family: monospace;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="formattedOutput"></div>
+
+    <script>
+        window.onload = function() {
+            const numCards = 10;
+            const cardLength = 15;
+            const bin = ''; // Optional BIN can be set here
+
+            let output = '';
+            for (let i = 0; i < numCards; i++) {
+                let cardNumber;
+                if (bin.length === 6 && /^\d+$/.test(bin)) {
+                    cardNumber = generateCardNumberWithBIN(bin, cardLength);
+                } else {
+                    cardNumber = generateCardNumberWithoutBIN(cardLength);
+                }
+
+                const expiryMonth = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+                const expiryYear = String(new Date().getFullYear() + Math.floor(Math.random() * 10)).padStart(4, '0');
+                const cvv = String(Math.floor(Math.random() * 900) + 100);
+
+                output += `${cardNumber}|${expiryMonth}|${expiryYear}|${cvv}\n`;
+            }
+
+            document.getElementById('formattedOutput').innerText = output.trim();
+        }
+
+        function generateCardNumberWithBIN(bin, length) {
+            let cardNumber = bin;
+            while (cardNumber.length < length - 1) {
+                cardNumber += Math.floor(Math.random() * 10);
+            }
+            cardNumber += calculateCheckDigit(cardNumber);
+            return cardNumber;
+        }
+
+        function generateCardNumberWithoutBIN(length) {
+            let cardNumber = '';
+            while (cardNumber.length < length - 1) {
+                cardNumber += Math.floor(Math.random() * 10);
+            }
+            cardNumber = '4' + cardNumber; // Start with a typical BIN for Visa cards
+            cardNumber += calculateCheckDigit(cardNumber);
+            return cardNumber;
+        }
+
+        function calculateCheckDigit(number) {
+            let sum = 0;
+            let shouldDouble = false;
+            
+            for (let i = number.length - 1; i >= 0; i--) {
+                let digit = parseInt(number.charAt(i));
+                if (shouldDouble) {
+                    digit *= 2;
+                    if (digit > 9) digit -= 9;
+                }
+                sum += digit;
+                shouldDouble = !shouldDouble;
+            }
+            
+            const checkDigit = (10 - (sum % 10)) % 10;
+            return checkDigit;
+        }
+    </script>
+</body>
+</html>
